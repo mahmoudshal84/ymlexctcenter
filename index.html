@@ -35,7 +35,12 @@
         <!-- Header & Navigation -->
         <header>
             <div class="header-content">
-                <h1>Organization Tracker</h1>
+                <div class="logo-title">
+                    <div class="logo-placeholder">
+                        <img src="https://via.placeholder.com/60" alt="Logo" id="org-logo">
+                    </div>
+                    <h1>Organization Tracker</h1>
+                </div>
                 <div class="user-info">
                     <span id="user-name"></span>
                     <button id="logout-btn" class="btn-small">Logout</button>
@@ -50,6 +55,7 @@
                     <li><a href="#" data-page="finances">Finances</a></li>
                     <li><a href="#" data-page="forms">Forms</a></li>
                     <li><a href="#" data-page="roles">Roles and Expectations</a></li>
+                    <li><a href="#" data-page="halaqas">Halaqas</a></li>
                 </ul>
             </nav>
         </header>
@@ -152,9 +158,25 @@
             <!-- Finances Section -->
             <section id="finances" class="content-section" style="display: none;">
                 <h2>Finances</h2>
-                <div class="action-bar">
-                    <button id="add-expense" class="btn">Add Expense</button>
-                    <button id="view-expenses" class="btn">View All Expenses</button>
+                <div class="finance-header">
+                    <div class="action-bar">
+                        <button id="add-expense" class="btn">Add Expense</button>
+                        <button id="view-expenses" class="btn">View All Expenses</button>
+                    </div>
+                    <div class="budget-display">
+                        <div class="budget-item">
+                            <span class="budget-label">Initial Budget:</span>
+                            <span id="initial-budget" class="budget-value">$0.00</span>
+                        </div>
+                        <div class="budget-item">
+                            <span class="budget-label">Spent to Date:</span>
+                            <span id="spent-to-date" class="budget-value">$0.00</span>
+                        </div>
+                        <div class="budget-item">
+                            <span class="budget-label">Remaining:</span>
+                            <span id="budget-remaining" class="budget-value">$0.00</span>
+                        </div>
+                    </div>
                 </div>
                 <div id="expenses-list" class="list-container">
                     <!-- Expenses will be listed here -->
@@ -185,6 +207,13 @@
                         <div class="form-group">
                             <label for="expense-approver">Approved By:</label>
                             <input type="text" id="expense-approver" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="expense-refunded">Refunded:</label>
+                            <select id="expense-refunded" required>
+                                <option value="no">No</option>
+                                <option value="yes">Yes</option>
+                            </select>
                         </div>
                         <div class="form-actions">
                             <button type="submit" class="btn">Save</button>
@@ -254,6 +283,51 @@
                         <div class="form-actions">
                             <button type="submit" class="btn">Save</button>
                             <button type="button" class="btn-cancel" id="cancel-role-add">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Halaqas Section -->
+            <section id="halaqas" class="content-section" style="display: none;">
+                <h2>Halaqas</h2>
+                <div class="action-bar">
+                    <button id="add-halaqa" class="btn">Add New Halaqa</button>
+                    <button id="view-halaqas" class="btn">View All Halaqas</button>
+                </div>
+                <div id="halaqas-list" class="list-container">
+                    <!-- Halaqas will be listed here -->
+                </div>
+                <div id="add-halaqa-form" class="form-container" style="display: none;">
+                    <h3>Add New Halaqa</h3>
+                    <form id="halaqa-form">
+                        <div class="form-group">
+                            <label for="halaqa-title">Halaqa Title:</label>
+                            <input type="text" id="halaqa-title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="halaqa-date">Date:</label>
+                            <input type="date" id="halaqa-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="halaqa-citation1">Citation 1:</label>
+                            <textarea id="halaqa-citation1" rows="3" placeholder="Ayah/Hadith/Sunnah citation" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="halaqa-citation2">Citation 2:</label>
+                            <textarea id="halaqa-citation2" rows="3" placeholder="Ayah/Hadith/Sunnah citation"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="halaqa-citation3">Citation 3:</label>
+                            <textarea id="halaqa-citation3" rows="3" placeholder="Ayah/Hadith/Sunnah citation"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="halaqa-notes">Notes:</label>
+                            <textarea id="halaqa-notes" rows="6" placeholder="Enter any notes, reflections, or action items"></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn">Save</button>
+                            <button type="button" class="btn-cancel" id="cancel-halaqa-add">Cancel</button>
                         </div>
                     </form>
                 </div>
