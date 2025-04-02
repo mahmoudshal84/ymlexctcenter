@@ -8,7 +8,7 @@ const firebaseConfig = {
     appId: "1:359813736996:web:e745bdb4cf8356183486b1",
     measurementId: "G-TM5HCSDV8L"
   };
-  
+
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
@@ -53,7 +53,20 @@ auth.onAuthStateChanged(async user => {
         userName.textContent = user.displayName || user.email;
         
         // Check if user is approved
-        const userDoc = await db.collection('users').doc(user.uid).get();
+        let userDoc = await db.collection('users').doc(user.uid).get();
+        
+        // Create user in database if they don't exist
+        if (!userDoc.exists) {
+            console.log('Creating new user document in Firestore for:', user.email);
+            await db.collection('users').doc(user.uid).set({
+                name: user.displayName || '',
+                email: user.email,
+                approved: false,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            // Get the updated user document after creation
+            userDoc = await db.collection('users').doc(user.uid).get();
+        }
         
         if (userDoc.exists && userDoc.data().approved) {
             // User is approved, show the app
@@ -68,16 +81,6 @@ auth.onAuthStateChanged(async user => {
             loginScreen.style.display = 'none';
             appContainer.style.display = 'none';
             approvalPendingScreen.style.display = 'flex';
-            
-            // Create user in database if they don't exist
-            if (!userDoc.exists) {
-                await db.collection('users').doc(user.uid).set({
-                    name: user.displayName || '',
-                    email: user.email,
-                    approved: false,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-            }
         }
     } else {
         // User is logged out
