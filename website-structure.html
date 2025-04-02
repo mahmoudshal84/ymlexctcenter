@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organization Tracker</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
+    <!-- CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="login-screen" class="container">
+        <div class="login-box">
+            <h1>Organization Tracker</h1>
+            <p>Please sign in with your Google account</p>
+            <button id="google-signin" class="btn">Sign in with Google</button>
+        </div>
+    </div>
+
+    <!-- Approval Pending Screen -->
+    <div id="approval-pending" class="container" style="display: none;">
+        <div class="message-box">
+            <h2>Account Approval Pending</h2>
+            <p>Get your account approved by your Ameer before accessing the system.</p>
+        </div>
+    </div>
+
+    <!-- Main Application (shown after successful login) -->
+    <div id="app-container" style="display: none;">
+        <!-- Header & Navigation -->
+        <header>
+            <div class="header-content">
+                <h1>Organization Tracker</h1>
+                <div class="user-info">
+                    <span id="user-name"></span>
+                    <button id="logout-btn" class="btn-small">Logout</button>
+                </div>
+            </div>
+            <!-- Main Navigation -->
+            <nav id="main-nav">
+                <ul>
+                    <li><a href="#" data-page="this-week">This Week's Work</a></li>
+                    <li><a href="#" data-page="meetings">Meeting-Related</a></li>
+                    <li><a href="#" data-page="checklists">Planning Checklists</a></li>
+                    <li><a href="#" data-page="finances">Finances</a></li>
+                    <li><a href="#" data-page="forms">Forms</a></li>
+                    <li><a href="#" data-page="roles">Roles and Expectations</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <!-- Main Content Area -->
+        <main id="content-area">
+            <!-- This Week's Work Section -->
+            <section id="this-week" class="content-section">
+                <h2>This Week's Work</h2>
+                <div class="action-bar">
+                    <button id="add-work-item" class="btn">Add New Task</button>
+                </div>
+                <div id="work-items-list" class="list-container">
+                    <!-- Work items will be added here dynamically -->
+                </div>
+                <div id="add-work-form" class="form-container" style="display: none;">
+                    <h3>Add New Task</h3>
+                    <form id="work-form">
+                        <div class="form-group">
+                            <label for="work-description">Task Description:</label>
+                            <input type="text" id="work-description" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="work-deadline">Deadline (optional):</label>
+                            <input type="date" id="work-deadline">
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn">Save</button>
+                            <button type="button" class="btn-cancel" id="cancel-work-add">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Meetings Section -->
+            <section id="meetings" class="content-section" style="display: none;">
+                <h2>Meeting-Related</h2>
+                <div class="action-bar">
+                    <button id="add-meeting" class="btn">Add Meeting Notes</button>
+                    <button id="view-past-meetings" class="btn">View Past Meetings</button>
+                </div>
+                <div id="meeting-list" class="list-container">
+                    <!-- Meeting notes will be listed here -->
+                </div>
+                <div id="add-meeting-form" class="form-container" style="display: none;">
+                    <h3>Add Meeting Notes</h3>
+                    <form id="meeting-form">
+                        <div class="form-group">
+                            <label for="meeting-date">Meeting Date:</label>
+                            <input type="date" id="meeting-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="meeting-title">Meeting Title:</label>
+                            <input type="text" id="meeting-title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="meeting-notes">Meeting Notes:</label>
+                            <textarea id="meeting-notes" rows="10" required></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn">Save</button>
+                            <button type="button" class="btn-cancel" id="cancel-meeting-add">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Checklists Section -->
+            <section id="checklists" class="content-section" style="display: none;">
+                <h2>Planning Checklists</h2>
+                <div class="action-bar">
+                    <button id="create-checklist" class="btn">Create New Checklist</button>
+                    <button id="view-past-checklists" class="btn">View Past Checklists</button>
+                </div>
+                <div id="current-checklist" class="checklist-container">
+                    <!-- Active checklist will appear here -->
+                </div>
+                <div id="add-checklist-form" class="form-container" style="display: none;">
+                    <h3>Create New Checklist</h3>
+                    <form id="checklist-form">
+                        <div class="form-group">
+                            <label for="checklist-title">Checklist Title:</label>
+                            <input type="text" id="checklist-title" required>
+                        </div>
+                        <div id="checklist-items">
+                            <div class="checklist-item">
+                                <input type="text" class="checklist-item-text" placeholder="Checklist item" required>
+                                <button type="button" class="remove-item">×</button>
+                            </div>
+                        </div>
+                        <button type="button" id="add-checklist-item" class="btn-small">Add Item</button>
+                        <div class="form-actions">
+                            <button type="submit" class="btn">Save Checklist</button>
+                            <button type="button" class="btn-cancel" id="cancel-checklist-add">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Finances Section -->
+            <section id="finances" class="content-section" style="display: none;">
+                <h2>Finances</h2>
+                <div class="action-bar">
+                    <button id="add-expense" class="btn">Add Expense</button>
+                    <button id="view-expenses" class="btn">View All Expenses</button>
+                </div>
+                <div id="expenses-list" class="list-container">
+                    <!-- Expenses will be listed here -->
+                </div>
+                <div id="add-expense-form" class="form-container" style="display: none;">
+                    <h3>Add Expense</h3>
+                    <form id="expense-form">
+                        <div class="form-group">
+                            <label for="expense-item">Item:</label>
+                            <input type="text" id="expense-item" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="expense-price">Price:</label>
+                            <input type="number" id="expense-price" step="0.01" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="expense-date">Date:</label>
+                            <input type="date" id="expense-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="expense-receipt">Receipt Link (Google Drive):</label>
+                            <input type="url" id="expense-receipt" placeholder="https://drive.google.com/...">
+                        </div>
+                        <div class="form-group">
+                            <label for="expense-reason">Reason for Purchase:</label>
+                            <textarea id="expense-reason" rows="3" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="expense-approver">Approved By:</label>
+                            <input type="text" id="expense-approver" required>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn">Save</button>
+                            <button type="button" class="btn-cancel" id="cancel-expense-add">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Forms Section -->
+            <section id="forms" class="content-section" style="display: none;">
+                <h2>Forms</h2>
+                <div class="action-bar">
+                    <button id="add-form" class="btn">Add Google Form</button>
+                    <button id="view-forms" class="btn">View All Forms</button>
+                </div>
+                <div id="forms-list" class="list-container">
+                    <!-- Forms will be listed here -->
+                </div>
+                <div id="add-form-form" class="form-container" style="display: none;">
+                    <h3>Add Google Form</h3>
+                    <form id="form-add-form">
+                        <div class="form-group">
+                            <label for="form-title">Form Title:</label>
+                            <input type="text" id="form-title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="form-url">Google Form URL:</label>
+                            <input type="url" id="form-url" required placeholder="https://docs.google.com/forms/...">
+                        </div>
+                        <div class="form-group">
+                            <label for="form-description">Description:</label>
+                            <textarea id="form-description" rows="3"></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn">Save</button>
+                            <button type="button" class="btn-cancel" id="cancel-form-add">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Roles Section -->
+            <section id="roles" class="content-section" style="display: none;">
+                <h2>Roles and Expectations</h2>
+                <div class="action-bar">
+                    <button id="add-role" class="btn">Add Member Role</button>
+                </div>
+                <div id="roles-list" class="list-container">
+                    <!-- Roles will be listed here -->
+                </div>
+                <div id="add-role-form" class="form-container" style="display: none;">
+                    <h3>Add Member Role</h3>
+                    <form id="role-form">
+                        <div class="form-group">
+                            <label for="member-name">Member Name:</label>
+                            <input type="text" id="member-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="member-role">Role:</label>
+                            <input type="text" id="member-role" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="role-description">Role Description:</label>
+                            <textarea id="role-description" rows="3"></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn">Save</button>
+                            <button type="button" class="btn-cancel" id="cancel-role-add">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="app.js"></script>
+</body>
+</html>
