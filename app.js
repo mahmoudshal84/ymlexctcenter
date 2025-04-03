@@ -1069,18 +1069,17 @@ async function loadForms() {
             snapshot.forEach(doc => {
                 const form = doc.data();
                 html += `
-                    <div class="list-item" data-id="${doc.id}">
-                        <div>
-                            <h3>${form.title}</h3>
-                            <div class="list-item-meta">Added by: ${form.createdByName || 'Unknown'}</div>
-                            <div class="list-item-description">${form.description || ''}</div>
-                        </div>
-                        <div class="list-item-actions">
-                            <a href="${form.url}" target="_blank" class="btn-small">Open Form</a>
-                            <button class="btn-small view-form-responses">Responses</button>
-                        </div>
-                    </div>
-                `;
+    <div class="list-item" data-id="${doc.id}">
+        <div>
+            <h3>${form.title}</h3>
+            <div class="list-item-meta">Added by: ${form.createdByName || 'Unknown'}</div>
+            <div class="list-item-description">${form.description || ''}</div>
+        </div>
+        <div class="list-item-actions">
+            <a href="${form.url}" target="_blank" class="btn-small">Open Form</a>
+        </div>
+    </div>
+`;
             });
         }
         
