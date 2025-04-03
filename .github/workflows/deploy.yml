@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master ]  # or master, depending on your default branch
 
 permissions:
   contents: write
@@ -35,14 +35,8 @@ jobs:
         # Add the firebase-config.js script to index.html
         sed -i '/<script src="https:\/\/www.gstatic.com\/firebasejs\/9.6.10\/firebase-storage-compat.js"><\/script>/a \    <script src="firebase-config.js"></script>' index.html
     
-    - name: Setup Pages
-      uses: actions/configure-pages@v3
-    
-    - name: Upload artifact
-      uses: actions/upload-pages-artifact@v2
-      with:
-        path: '.'
-        
     - name: Deploy to GitHub Pages
-      id: deployment
-      uses: actions/deploy-pages@v2
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        folder: .  # Deploy the entire repository
+        branch: gh-pages
