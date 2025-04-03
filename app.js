@@ -1263,7 +1263,6 @@ async function loadHalaqas() {
                         ` : ''}
                         <div class="halaqa-actions">
                             <button class="btn-small edit-halaqa">Edit</button>
-                            <button class="btn-small delete-halaqa">Delete</button>
                         </div>
                     </div>
                 `;
@@ -1274,15 +1273,11 @@ async function loadHalaqas() {
         
         // Add event listeners to buttons
         const editButtons = halaqasList.querySelectorAll('.edit-halaqa');
-        const deleteButtons = halaqasList.querySelectorAll('.delete-halaqa');
         
         editButtons.forEach(button => {
             button.addEventListener('click', editHalaqa);
         });
         
-        deleteButtons.forEach(button => {
-            button.addEventListener('click', deleteHalaqa);
-        });
     } catch (error) {
         console.error('Error loading halaqas:', error);
         halaqasList.innerHTML = '<div class="error-message">Error loading halaqas. Please try again.</div>';
