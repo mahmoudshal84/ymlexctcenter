@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [ master ]  # or master, depending on your default branch
+    branches: [ master ]
 
 permissions:
   contents: write
@@ -14,29 +14,12 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
-    - name: Inject Firebase config
+    - name: Inject Firebase config directly into HTML
       run: |
-        # Create a temporary file with the Firebase configuration
-        cat > firebase-config.js << EOL
-        // Firebase Configuration - Injected during build
-        const firebaseConfig = {
-            apiKey: "${{ secrets.FIREBASE_API_KEY }}",
-            authDomain: "${{ secrets.FIREBASE_AUTH_DOMAIN }}",
-            projectId: "${{ secrets.FIREBASE_PROJECT_ID }}",
-            storageBucket: "${{ secrets.FIREBASE_STORAGE_BUCKET }}",
-            messagingSenderId: "${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}",
-            appId: "${{ secrets.FIREBASE_APP_ID }}",
-            measurementId: "${{ secrets.FIREBASE_MEASUREMENT_ID }}"
-        };
-        EOL
-    
-    - name: Update index.html
-      run: |
-        # Add the firebase-config.js script to index.html
-        sed -i '/<script src="https:\/\/www.gstatic.com\/firebasejs\/9.6.10\/firebase-storage-compat.js"><\/script>/a \    <script src="firebase-config.js"></script>' index.html
+        sed -i '/<script src="app.js"><\/script>/i \    <script>\n        // Firebase Configuration - Injected during build\n        const firebaseConfig = {\n            apiKey: "${{ secrets.FIREBASE_API_KEY }}",\n            authDomain: "${{ secrets.FIREBASE_AUTH_DOMAIN }}",\n            projectId: "${{ secrets.FIREBASE_PROJECT_ID }}",\n            storageBucket: "${{ secrets.FIREBASE_STORAGE_BUCKET }}",\n            messagingSenderId: "${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}",\n            appId: "${{ secrets.FIREBASE_APP_ID }}",\n            measurementId: "${{ secrets.FIREBASE_MEASUREMENT_ID }}"\n        };\n    </script>' index.html
     
     - name: Deploy to GitHub Pages
-      uses: JamesIves/github-pages-deploy-action@v4
+      uses: peaceiris/actions-gh-pages@v3
       with:
-        folder: .  # Deploy the entire repository
-        branch: gh-pages
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: .
