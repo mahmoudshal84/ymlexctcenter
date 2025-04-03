@@ -54,8 +54,8 @@
                     <li><a href="#" data-page="checklists">Planning Checklists</a></li>
                     <li><a href="#" data-page="finances">Finances</a></li>
                     <li><a href="#" data-page="forms">Forms</a></li>
-                    <li><a href="#" data-page="roles">Roles and Expectations</a></li>
                     <li><a href="#" data-page="halaqas">Halaqas</a></li>
+                    <li><a href="#" data-page="roles">Roles and Expectations</a></li>
                 </ul>
             </nav>
         </header>
@@ -161,6 +161,7 @@
                 <div class="finance-header">
                     <div class="action-bar">
                         <button id="add-expense" class="btn">Add Expense</button>
+                        <button id="add-donation" class="btn">Add Donation</button>
                         <button id="view-expenses" class="btn">View All Expenses</button>
                     </div>
                     <div class="budget-display">
@@ -221,6 +222,31 @@
                         </div>
                     </form>
                 </div>
+                <div id="add-donation-form" class="form-container" style="display: none;">
+    <h3>Add Donation</h3>
+    <form id="donation-form">
+        <div class="form-group">
+            <label for="donation-amount">Amount:</label>
+            <input type="number" id="donation-amount" step="0.01" min="0" required>
+        </div>
+        <div class="form-group">
+            <label for="donation-date">Date:</label>
+            <input type="date" id="donation-date" required>
+        </div>
+        <div class="form-group">
+            <label for="donation-donor">Donor Name:</label>
+            <input type="text" id="donation-donor" required>
+        </div>
+        <div class="form-group">
+            <label for="donation-notes">Notes:</label>
+            <textarea id="donation-notes" rows="3"></textarea>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn">Save</button>
+            <button type="button" class="btn-cancel" id="cancel-donation-add">Cancel</button>
+        </div>
+    </form>
+</div>
             </section>
 
             <!-- Forms Section -->
@@ -251,38 +277,6 @@
                         <div class="form-actions">
                             <button type="submit" class="btn">Save</button>
                             <button type="button" class="btn-cancel" id="cancel-form-add">Cancel</button>
-                        </div>
-                    </form>
-                </div>
-            </section>
-
-            <!-- Roles Section -->
-            <section id="roles" class="content-section" style="display: none;">
-                <h2>Roles and Expectations</h2>
-                <div class="action-bar">
-                    <button id="add-role" class="btn">Add Member Role</button>
-                </div>
-                <div id="roles-list" class="list-container">
-                    <!-- Roles will be listed here -->
-                </div>
-                <div id="add-role-form" class="form-container" style="display: none;">
-                    <h3>Add Member Role</h3>
-                    <form id="role-form">
-                        <div class="form-group">
-                            <label for="member-name">Member Name:</label>
-                            <input type="text" id="member-name" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="member-role">Role:</label>
-                            <input type="text" id="member-role" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="role-description">Role Description:</label>
-                            <textarea id="role-description" rows="3"></textarea>
-                        </div>
-                        <div class="form-actions">
-                            <button type="submit" class="btn">Save</button>
-                            <button type="button" class="btn-cancel" id="cancel-role-add">Cancel</button>
                         </div>
                     </form>
                 </div>
@@ -329,6 +323,39 @@
                             <button type="submit" class="btn">Save</button>
                             <button type="button" class="btn-cancel" id="cancel-halaqa-add">Cancel</button>
                         </div>
+
+
+            <!-- Roles Section -->
+            <section id="roles" class="content-section" style="display: none;">
+                <h2>Roles and Expectations</h2>
+                <div class="action-bar">
+                    <button id="add-role" class="btn">Add Member Role</button>
+                </div>
+                <div id="roles-list" class="list-container">
+                    <!-- Roles will be listed here -->
+                </div>
+                <div id="add-role-form" class="form-container" style="display: none;">
+                    <h3>Add Member Role</h3>
+                    <form id="role-form">
+                        <div class="form-group">
+                            <label for="member-name">Member Name:</label>
+                            <input type="text" id="member-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="member-role">Role:</label>
+                            <input type="text" id="member-role" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="role-description">Role Description:</label>
+                            <textarea id="role-description" rows="3"></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn">Save</button>
+                            <button type="button" class="btn-cancel" id="cancel-role-add">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
                     </form>
                 </div>
             </section>
