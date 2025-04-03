@@ -673,6 +673,54 @@ expenseForm.addEventListener('submit', async (e) => {
     }
 });
 
+// Add these after the expense-related DOM elements
+const addDonationBtn = document.getElementById('add-donation');
+const addDonationForm = document.getElementById('add-donation-form');
+const donationForm = document.getElementById('donation-form');
+const cancelDonationAddBtn = document.getElementById('cancel-donation-add');
+
+// Show/hide donation form
+addDonationBtn.addEventListener('click', () => {
+    addDonationForm.style.display = 'block';
+    donationForm.reset();
+    
+    // Set default date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('donation-date').value = today;
+});
+
+cancelDonationAddBtn.addEventListener('click', () => {
+    addDonationForm.style.display = 'none';
+});
+
+// Handle donation form submission
+donationForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const amount = parseFloat(document.getElementById('donation-amount').value);
+    const date = document.getElementById('donation-date').value;
+    const donor = document.getElementById('donation-donor').value;
+    const notes = document.getElementById('donation-notes').value;
+    
+    try {
+        await db.collection('donations').add({
+            amount,
+            date,
+            donor,
+            notes,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            createdBy: currentUser.uid,
+            createdByName: currentUser.displayName
+        });
+        
+        addDonationForm.style.display = 'none';
+        loadExpenses(); // This will now also load donations
+    } catch (error) {
+        console.error('Error adding donation:', error);
+        alert('Error adding donation. Please try again.');
+    }
+});
+
 // Function to load budget information
 async function loadBudgetInfo() {
     try {
@@ -697,89 +745,123 @@ async function loadBudgetInfo() {
     }
 }
 
-// Load expenses
 async function loadExpenses() {
     try {
         // Load budget information first
         await loadBudgetInfo();
         
-        const snapshot = await db.collection('expenses')
+        // Load expenses
+        const expensesSnapshot = await db.collection('expenses')
+            .orderBy('date', 'desc')
+            .get();
+            
+        // Load donations
+        const donationsSnapshot = await db.collection('donations')
             .orderBy('date', 'desc')
             .get();
         
         let html = '';
-        let total = 0;
+        let totalExpenses = 0;
+        let totalDonations = 0;
         
-        if (snapshot.empty) {
-            html = '<div class="empty-list">No expenses found. Add some using the button above.</div>';
-        } else {
-            html += `
-                <div class="expense-table">
-                    <div class="expense-header">
-                        <div class="expense-cell">Item</div>
-                        <div class="expense-cell">Price</div>
-                        <div class="expense-cell">Date</div>
-                        <div class="expense-cell">Approved By</div>
-                        <div class="expense-cell">Refunded</div>
-                        <div class="expense-cell">Actions</div>
-                    </div>
-            `;
-            
-            snapshot.forEach(doc => {
-                const expense = doc.data();
-                // Only add to total if not refunded
-                if (!expense.refunded) {
-                    total += expense.price;
-                }
-                
-                html += `
-                    <div class="expense-row" data-id="${doc.id}">
-                        <div class="expense-cell">${expense.item}</div>
-                        <div class="expense-cell">$${expense.price.toFixed(2)}</div>
-                        <div class="expense-cell">${expense.date}</div>
-                        <div class="expense-cell">${expense.approvedBy}</div>
-                        <div class="expense-cell">${expense.refunded ? 'Yes' : 'No'}</div>
-                        <div class="expense-cell">
-                            <button class="btn-small view-expense">Details</button>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            html += `</div>
-                <div class="expense-summary">
-                    <strong>Total Expenses: $${total.toFixed(2)}</strong>
-                </div>
-            `;
-        }
+        // Process expenses
+        expensesSnapshot.forEach(doc => {
+            const expense = doc.data();
+            if (!expense.refunded) {
+                totalExpenses += expense.price;
+            }
+        });
         
-        expensesList.innerHTML = html;
+        // Process donations
+        donationsSnapshot.forEach(doc => {
+            const donation = doc.data();
+            totalDonations += donation.amount;
+        });
         
-        // Update the spent-to-date display
-        document.getElementById('spent-to-date').textContent = `$${total.toFixed(2)}`;
-        
-        // Calculate remaining budget
+        // Calculate net budget
         const initialBudget = parseFloat(document.getElementById('initial-budget').textContent.replace('$', ''));
-        const remaining = initialBudget - total;
-        document.getElementById('budget-remaining').textContent = `$${remaining.toFixed(2)}`;
+        const netBudget = initialBudget + totalDonations - totalExpenses;
+        
+        // Update the displayed information
+        document.getElementById('total-donations').textContent = `$${totalDonations.toFixed(2)}`;
+        document.getElementById('spent-to-date').textContent = `$${totalExpenses.toFixed(2)}`;
+        document.getElementById('budget-remaining').textContent = `$${netBudget.toFixed(2)}`;
+        
         // Add color based on remaining amount
         const remainingElement = document.getElementById('budget-remaining');
-        if (remaining < 0) {
+        if (netBudget < 0) {
             remainingElement.style.color = 'var(--error-color)';
-        } else if (remaining < initialBudget * 0.2) { // Less than 20% remaining
+        } else if (netBudget < initialBudget * 0.2) {
             remainingElement.style.color = 'orange';
         } else {
             remainingElement.style.color = 'var(--success-color)';
         }
         
+        // Generate the HTML for expenses and donations table
+        // Generate table headers
+        html += `
+            <div class="expense-table">
+                <div class="expense-header">
+                    <div class="expense-cell">Type</div>
+                    <div class="expense-cell">Description</div>
+                    <div class="expense-cell">Amount</div>
+                    <div class="expense-cell">Date</div>
+                    <div class="expense-cell">Person</div>
+                    <div class="expense-cell">Actions</div>
+                </div>
+        `;
+        
+        // Add expenses to the table
+        expensesSnapshot.forEach(doc => {
+            const expense = doc.data();
+            html += `
+                <div class="expense-row" data-id="${doc.id}" data-type="expense">
+                    <div class="expense-cell">Expense</div>
+                    <div class="expense-cell">${expense.item}</div>
+                    <div class="expense-cell">-$${expense.price.toFixed(2)}</div>
+                    <div class="expense-cell">${expense.date}</div>
+                    <div class="expense-cell">${expense.approvedBy}</div>
+                    <div class="expense-cell">
+                        <button class="btn-small view-expense">Details</button>
+                    </div>
+                </div>
+            `;
+        });
+        
+        // Add donations to the table
+        donationsSnapshot.forEach(doc => {
+            const donation = doc.data();
+            html += `
+                <div class="expense-row donation-row" data-id="${doc.id}" data-type="donation">
+                    <div class="expense-cell">Donation</div>
+                    <div class="expense-cell">${donation.notes || 'General Donation'}</div>
+                    <div class="expense-cell donation-amount">+$${donation.amount.toFixed(2)}</div>
+                    <div class="expense-cell">${donation.date}</div>
+                    <div class="expense-cell">${donation.donor}</div>
+                    <div class="expense-cell">
+                        <button class="btn-small view-donation">Details</button>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += `</div>`;
+        
+        expensesList.innerHTML = html;
+        
         // Add event listeners to view buttons
-        const viewButtons = expensesList.querySelectorAll('.view-expense');
-        viewButtons.forEach(button => {
+        const viewExpenseButtons = expensesList.querySelectorAll('.view-expense');
+        viewExpenseButtons.forEach(button => {
             button.addEventListener('click', viewExpense);
         });
+        
+        const viewDonationButtons = expensesList.querySelectorAll('.view-donation');
+        viewDonationButtons.forEach(button => {
+            button.addEventListener('click', viewDonation);
+        });
     } catch (error) {
-        console.error('Error loading expenses:', error);
-        expensesList.innerHTML = '<div class="error-message">Error loading expenses. Please try again.</div>';
+        console.error('Error loading finances:', error);
+        expensesList.innerHTML = '<div class="error-message">Error loading financial data. Please try again.</div>';
     }
 }
 
@@ -860,6 +942,71 @@ async function viewExpense(e) {
     } catch (error) {
         console.error('Error viewing expense:', error);
         alert('Error viewing expense. Please try again.');
+    }
+}
+
+async function viewDonation(e) {
+    const button = e.target;
+    const row = button.closest('.donation-row');
+    const donationId = row.getAttribute('data-id');
+    
+    try {
+        const doc = await db.collection('donations').doc(donationId).get();
+        if (doc.exists) {
+            const donation = doc.data();
+            
+            // Create modal for viewing donation
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <h2>Donation Details</h2>
+                    <div class="expense-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Amount:</div>
+                            <div class="detail-value">$${donation.amount.toFixed(2)}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Date:</div>
+                            <div class="detail-value">${donation.date}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Donor:</div>
+                            <div class="detail-value">${donation.donor}</div>
+                        </div>
+                        ${donation.notes ? `
+                            <div class="detail-row">
+                                <div class="detail-label">Notes:</div>
+                                <div class="detail-value">${donation.notes}</div>
+                            </div>
+                        ` : ''}
+                        <div class="detail-row">
+                            <div class="detail-label">Added By:</div>
+                            <div class="detail-value">${donation.createdByName || 'Unknown'}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Handle closing modal
+            const closeBtn = modal.querySelector('.close');
+            closeBtn.addEventListener('click', () => {
+                modal.remove();
+            });
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Error viewing donation:', error);
+        alert('Error viewing donation. Please try again.');
     }
 }
 
