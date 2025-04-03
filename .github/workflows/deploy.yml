@@ -36,4 +36,4 @@ jobs:
       uses: JamesIves/github-pages-deploy-action@v4
       with:
         folder: .  # Deploy the entire repository
-        branch: gh-pages
+        branch: [ master ]
