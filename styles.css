@@ -197,7 +197,9 @@
         align-items: flex-start;
         gap: 0.5rem;
     }
-} Global Styles */
+} 
+
+/* Global Styles */
 :root {
     --primary-color: #0a2e52; /* Navy blue */
     --secondary-color: #f7f3e8; /* Creme */
@@ -708,43 +710,4 @@ header h1 {
 .modal-body pre {
     white-space: pre-wrap;
     font-family: inherit;
-}
-
-/* Responsive Adjustments */
-@media (max-width: 768px) {
-    .header-content {
-        flex-direction: column;
-        text-align: center;
-        gap: 1rem;
-    }
-    
-    #main-nav ul {
-        justify-content: flex-start;
-        padding-bottom: 0.5rem;
-    }
-    
-    .action-bar {
-        flex-direction: column;
-    }
-    
-    .action-bar .btn {
-        width: 100%;
-    }
-    
-    .form-actions {
-        flex-direction: column;
-    }
-    
-    .form-actions .btn,
-    .form-actions .btn-cancel {
-        width: 100%;
-    }
-    
-    #content-area {
-        padding: 1rem;
-    }
-    
-    .content-section {
-        padding: 1.5rem;
-    }
 }
