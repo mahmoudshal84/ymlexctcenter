@@ -4,6 +4,9 @@ on:
   push:
     branches: [ master ]
 
+permissions:
+  contents: write  # Add this permissions section
+
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
