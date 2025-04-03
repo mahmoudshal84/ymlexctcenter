@@ -1261,22 +1261,12 @@ async function loadHalaqas() {
                                 <p>${halaqa.notes}</p>
                             </div>
                         ` : ''}
-                        <div class="halaqa-actions">
-                            <button class="btn-small edit-halaqa">Edit</button>
-                        </div>
                     </div>
                 `;
             });
         }
         
         halaqasList.innerHTML = html;
-        
-        // Add event listeners to buttons
-        const editButtons = halaqasList.querySelectorAll('.edit-halaqa');
-        
-        editButtons.forEach(button => {
-            button.addEventListener('click', editHalaqa);
-        });
         
     } catch (error) {
         console.error('Error loading halaqas:', error);
