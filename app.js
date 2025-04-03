@@ -505,7 +505,7 @@ async function loadChecklists() {
             .limit(5)
             .get();
         
-        let html = '<h3>Recent Checklists</h3>';
+        let html = '';
         
         if (snapshot.empty) {
             html += '<div class="empty-list">No checklists found. Create one using the button above.</div>';
