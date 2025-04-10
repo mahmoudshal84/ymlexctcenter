@@ -1274,6 +1274,112 @@ async function loadHalaqas() {
     }
 }
 
+viewHalaqasBtn.addEventListener('click', viewHalaqaSchedule);
+
+// Function to view halaqa schedule
+async function viewHalaqaSchedule() {
+    try {
+        // Try to get the halaqa schedule from Firestore
+        const scheduleDoc = await db.collection('settings').doc('halaqaSchedule').get();
+        let scheduleText = '';
+        
+        if (scheduleDoc.exists) {
+            scheduleText = scheduleDoc.data().text || '';
+        }
+        
+        // Create modal for viewing/editing halaqa schedule
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Halaqa Schedule</h2>
+                <div class="schedule-container">
+                    <div id="schedule-display" class="schedule-text">${scheduleText}</div>
+                    <div id="schedule-edit" style="display: none;">
+                        <textarea id="schedule-textarea" rows="10" class="schedule-textarea">${scheduleText}</textarea>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button id="edit-schedule" class="btn">Edit Halaqa Schedule</button>
+                    <button id="save-schedule" class="btn" style="display: none;">Save Changes</button>
+                    <button id="cancel-edit" class="btn-cancel" style="display: none;">Cancel</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Handle closing modal
+        const closeBtn = modal.querySelector('.close');
+        closeBtn.addEventListener('click', () => {
+            modal.remove();
+        });
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+        
+        // Handle edit button click
+        const editBtn = modal.querySelector('#edit-schedule');
+        const saveBtn = modal.querySelector('#save-schedule');
+        const cancelBtn = modal.querySelector('#cancel-edit');
+        const displayDiv = modal.querySelector('#schedule-display');
+        const editDiv = modal.querySelector('#schedule-edit');
+        
+        editBtn.addEventListener('click', () => {
+            displayDiv.style.display = 'none';
+            editDiv.style.display = 'block';
+            editBtn.style.display = 'none';
+            saveBtn.style.display = 'inline-block';
+            cancelBtn.style.display = 'inline-block';
+        });
+        
+        // Handle cancel button click
+        cancelBtn.addEventListener('click', () => {
+            displayDiv.style.display = 'block';
+            editDiv.style.display = 'none';
+            editBtn.style.display = 'inline-block';
+            saveBtn.style.display = 'none';
+            cancelBtn.style.display = 'none';
+        });
+        
+        // Handle save button click
+        saveBtn.addEventListener('click', async () => {
+            const newText = modal.querySelector('#schedule-textarea').value;
+            
+            try {
+                // Save the updated schedule text to Firestore
+                await db.collection('settings').doc('halaqaSchedule').set({
+                    text: newText,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedBy: currentUser.uid,
+                    updatedByName: currentUser.displayName
+                });
+                
+                // Update the display
+                displayDiv.textContent = newText;
+                
+                // Switch back to display mode
+                displayDiv.style.display = 'block';
+                editDiv.style.display = 'none';
+                editBtn.style.display = 'inline-block';
+                saveBtn.style.display = 'none';
+                cancelBtn.style.display = 'none';
+            } catch (error) {
+                console.error('Error saving halaqa schedule:', error);
+                alert('Error saving halaqa schedule. Please try again.');
+            }
+        });
+    } catch (error) {
+        console.error('Error loading halaqa schedule:', error);
+        alert('Error loading halaqa schedule. Please try again.');
+    }
+}
+
 // Initialize the application by loading the content
 document.addEventListener('DOMContentLoaded', () => {
     // Set "This Week's Work" as active by default
