@@ -152,6 +152,20 @@
     resize: vertical;
 }
 
+.bullet-point {
+    margin-left: 1.5rem;
+    margin-bottom: 0.8rem;
+    position: relative;
+    padding-left: 0.5rem;
+}
+
+.schedule-heading {
+    font-weight: 600;
+    margin-top: 1rem;
+    margin-bottom: 0.8rem;
+    color: var(--primary-color);
+}
+
 .edit-instructions {
     font-size: 0.9rem;
     color: var(--dark-gray);
