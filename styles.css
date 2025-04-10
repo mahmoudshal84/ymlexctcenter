@@ -118,8 +118,38 @@
     gap: 0.5rem;
 }
 
+.schedule-container {
+    margin: 1.5rem 0;
+}
+
+.schedule-text {
+    background-color: var(--secondary-color);
+    padding: 1.5rem;
+    border-radius: 8px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    min-height: 150px;
+}
+
+.schedule-textarea {
+    width: 100%;
+    min-height: 200px;
+    padding: 1rem;
+    border: 1px solid var(--light-gray);
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    line-height: 1.6;
+    resize: vertical;
+}
+
 /* Responsive Adjustments */
 @media (max-width: 768px) {
+
+    .schedule-text {
+        padding: 1rem;
+    }
+
     #main-nav {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
