@@ -1280,47 +1280,30 @@ viewHalaqasBtn.addEventListener('click', viewHalaqaSchedule);
 function formatScheduleText(text) {
     if (!text) return 'No schedule has been added yet.';
     
-    // Replace bullet points with HTML list items
-    let formattedText = '';
-    let inList = false;
+    // Simple HTML conversion - convert newlines to <br> tags
+    // and wrap the whole thing in a div
+    let formattedText = '<div>';
     
     // Split text by lines
     const lines = text.split('\n');
     
     for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
+        const line = lines[i].trim();
         
-        if (line.trim().startsWith('• ') || line.trim().startsWith('- ')) {
-            // This is a bullet point line
-            if (!inList) {
-                // Start a new list if we're not already in one
-                formattedText += '<ul>';
-                inList = true;
-            }
-            // Add list item
-            formattedText += `<li>${line.trim().substring(2)}</li>`;
+        if (line === '') {
+            // Empty line becomes a line break
+            formattedText += '<br>';
+        } else if (line.startsWith('• ') || line.startsWith('- ')) {
+            // Simple bullet point formatting - indent and add some visual cues
+            const bulletContent = line.substring(2);
+            formattedText += `<div class="bullet-point">• ${bulletContent}</div>`;
         } else {
-            // Regular text line
-            if (inList) {
-                // Close list if we were in one
-                formattedText += '</ul>';
-                inList = false;
-            }
-            
-            // Add regular paragraph
-            if (line.trim()) {
-                formattedText += `<p>${line}</p>`;
-            } else {
-                formattedText += '<br>';
-            }
+            // Regular text becomes a paragraph with some styling
+            formattedText += `<div class="schedule-heading">${line}</div>`;
         }
     }
     
-    // Close list if still open
-    if (inList) {
-        formattedText += '</ul>';
-    }
-    
+    formattedText += '</div>';
     return formattedText;
 }
 
