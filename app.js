@@ -1276,6 +1276,54 @@ async function loadHalaqas() {
 
 viewHalaqasBtn.addEventListener('click', viewHalaqaSchedule);
 
+// Function to format schedule text with bullet points
+function formatScheduleText(text) {
+    if (!text) return 'No schedule has been added yet.';
+    
+    // Replace bullet points with HTML list items
+    let formattedText = '';
+    let inList = false;
+    
+    // Split text by lines
+    const lines = text.split('\n');
+    
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        
+        if (line.trim().startsWith('• ') || line.trim().startsWith('- ')) {
+            // This is a bullet point line
+            if (!inList) {
+                // Start a new list if we're not already in one
+                formattedText += '<ul>';
+                inList = true;
+            }
+            // Add list item
+            formattedText += `<li>${line.trim().substring(2)}</li>`;
+        } else {
+            // Regular text line
+            if (inList) {
+                // Close list if we were in one
+                formattedText += '</ul>';
+                inList = false;
+            }
+            
+            // Add regular paragraph
+            if (line.trim()) {
+                formattedText += `<p>${line}</p>`;
+            } else {
+                formattedText += '<br>';
+            }
+        }
+    }
+    
+    // Close list if still open
+    if (inList) {
+        formattedText += '</ul>';
+    }
+    
+    return formattedText;
+}
+
 // Function to view halaqa schedule
 async function viewHalaqaSchedule() {
     try {
@@ -1295,9 +1343,16 @@ async function viewHalaqaSchedule() {
                 <span class="close">&times;</span>
                 <h2>Halaqa Schedule</h2>
                 <div class="schedule-container">
-                    <div id="schedule-display" class="schedule-text">${scheduleText}</div>
+                    <div id="schedule-display" class="schedule-text">${formatScheduleText(scheduleText)}</div>
                     <div id="schedule-edit" style="display: none;">
-                        <textarea id="schedule-textarea" rows="10" class="schedule-textarea">${scheduleText}</textarea>
+                        <div class="form-group">
+                            <p class="edit-instructions">Use bullet points by starting lines with "• " (bullet and space) or "- " (dash and space).</p>
+                            <textarea id="schedule-textarea" rows="10" class="schedule-textarea" placeholder="Enter the halaqa schedule here...
+• Use bullet points like this
+• For each scheduled item
+- Or use dashes instead
+- For organized content">${scheduleText}</textarea>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-actions">
@@ -1360,8 +1415,8 @@ async function viewHalaqaSchedule() {
                     updatedByName: currentUser.displayName
                 });
                 
-                // Update the display
-                displayDiv.textContent = newText;
+                // Format and update the display
+                displayDiv.innerHTML = formatScheduleText(newText);
                 
                 // Switch back to display mode
                 displayDiv.style.display = 'block';
