@@ -178,6 +178,15 @@
 /* Responsive Adjustments */
 @media (max-width: 768px) {
 
+    .drive-link {
+    margin: 1rem 0;
+    width: 100%;
+    }
+
+    .drive-btn {
+        width: 100%;
+    }
+
     .schedule-text {
         padding: 1rem;
     }
@@ -398,6 +407,31 @@ header {
     align-items: center;
     padding: 0 2rem;
     margin-bottom: 1rem;
+}
+
+.drive-link {
+    display: flex;
+    justify-content: center;
+    flex-grow: 1;
+    margin: 0 2rem;
+}
+
+.drive-btn {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.drive-btn:hover {
+    background-color: #c0a372;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .logo-title {
