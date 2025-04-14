@@ -1073,19 +1073,17 @@ async function loadInventory() {
             snapshot.forEach(doc => {
                 const inventoryItem = doc.data();
                 html += `
-                    <div class="list-item inventory-item" data-id="${doc.id}">
-                        <div>
-                            <h3>${inventoryItem.item}</h3>
-                            <div class="list-item-meta">Location: ${inventoryItem.location}</div>
-                            <div class="list-item-meta">Quantity: <span class="quantity-value">${inventoryItem.quantity}</span></div>
-                        </div>
-                        <div class="list-item-actions inventory-actions">
-                            <button class="btn-small decrease-quantity">-</button>
-                            <button class="btn-small increase-quantity">+</button>
-                            <button class="btn-small view-inventory-item">Details</button>
-                        </div>
-                    </div>
-                `;
+    <div class="list-item inventory-item" data-id="${doc.id}">
+        <div>
+            <h3>${inventoryItem.item}</h3>
+            <div class="list-item-meta">Location: ${inventoryItem.location}</div>
+            <div class="list-item-meta">Quantity: <span class="quantity-value">${inventoryItem.quantity}</span></div>
+        </div>
+        <div class="list-item-actions inventory-actions">
+            <button class="btn-small view-inventory-item">Details</button>
+        </div>
+    </div>
+`;
             });
         }
         
@@ -1093,17 +1091,6 @@ async function loadInventory() {
         
         // Only add event listeners if there are items
         if (!snapshot.empty) {
-            // Add event listeners to quantity buttons
-            const decreaseButtons = inventoryList.querySelectorAll('.decrease-quantity');
-            decreaseButtons.forEach(button => {
-                button.addEventListener('click', decreaseInventoryQuantity);
-            });
-            
-            const increaseButtons = inventoryList.querySelectorAll('.increase-quantity');
-            increaseButtons.forEach(button => {
-                button.addEventListener('click', increaseInventoryQuantity);
-            });
-            
             // Add event listeners to view buttons
             const viewButtons = inventoryList.querySelectorAll('.view-inventory-item');
             viewButtons.forEach(button => {
@@ -1208,11 +1195,13 @@ async function viewInventoryItem(e) {
                             <div class="detail-label">Added By:</div>
                             <div class="detail-value">${inventoryItem.createdByName || 'Unknown'}</div>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="update-quantity">Update Quantity:</label>
-                        <input type="number" id="update-quantity" min="0" value="${inventoryItem.quantity}">
-                        <button id="save-quantity" class="btn">Save New Quantity</button>
+                      </div>
+                      <div class="form-group" style="margin-top: 20px; padding: 15px; background-color: var(--secondary-color); border-radius: 8px;">
+                          <h3 style="margin-top: 0; margin-bottom: 10px;">Update Quantity</h3>
+                          <div style="display: flex; gap: 10px; align-items: center;">
+                          <input type="number" id="update-quantity" min="0" value="${inventoryItem.quantity}" style="flex: 1;">
+                          <button id="save-quantity" class="btn">Save</button>
+                      </div>
                     </div>
                 </div>
             `;
