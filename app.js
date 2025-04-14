@@ -129,6 +129,9 @@ function loadContent(page) {
             case 'finances':
                 loadExpenses();
                 break;
+            case 'inventory':
+                loadInventory();
+                break;
             case 'forms':
                 loadForms();
                 break;
