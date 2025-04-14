@@ -1061,12 +1061,12 @@ inventoryForm.addEventListener('submit', async (e) => {
 // Load inventory
 async function loadInventory() {
     try {
-        const snapshot = await db.collection('inventory')
-            .orderBy('item')
-            .get();
+        // Get all documents from the collection (this won't error even if collection doesn't exist)
+        const snapshot = await db.collection('inventory').orderBy('item').get();
         
         let html = '';
         
+        // If snapshot is empty (which includes if collection doesn't exist yet)
         if (snapshot.empty) {
             html = '<div class="empty-list">No inventory items found. Add some using the button above.</div>';
         } else {
@@ -1091,25 +1091,34 @@ async function loadInventory() {
         
         inventoryList.innerHTML = html;
         
-        // Add event listeners to quantity buttons
-        const decreaseButtons = inventoryList.querySelectorAll('.decrease-quantity');
-        decreaseButtons.forEach(button => {
-            button.addEventListener('click', decreaseInventoryQuantity);
-        });
-        
-        const increaseButtons = inventoryList.querySelectorAll('.increase-quantity');
-        increaseButtons.forEach(button => {
-            button.addEventListener('click', increaseInventoryQuantity);
-        });
-        
-        // Add event listeners to view buttons
-        const viewButtons = inventoryList.querySelectorAll('.view-inventory-item');
-        viewButtons.forEach(button => {
-            button.addEventListener('click', viewInventoryItem);
-        });
+        // Only add event listeners if there are items
+        if (!snapshot.empty) {
+            // Add event listeners to quantity buttons
+            const decreaseButtons = inventoryList.querySelectorAll('.decrease-quantity');
+            decreaseButtons.forEach(button => {
+                button.addEventListener('click', decreaseInventoryQuantity);
+            });
+            
+            const increaseButtons = inventoryList.querySelectorAll('.increase-quantity');
+            increaseButtons.forEach(button => {
+                button.addEventListener('click', increaseInventoryQuantity);
+            });
+            
+            // Add event listeners to view buttons
+            const viewButtons = inventoryList.querySelectorAll('.view-inventory-item');
+            viewButtons.forEach(button => {
+                button.addEventListener('click', viewInventoryItem);
+            });
+        }
     } catch (error) {
         console.error('Error loading inventory:', error);
-        inventoryList.innerHTML = '<div class="error-message">Error loading inventory. Please try again.</div>';
+        
+        // Show a more helpful message that doesn't just say "Error"
+        inventoryList.innerHTML = `
+            <div class="empty-list">
+                No inventory items found. Click "Add Inventory Item" to create your first item.
+            </div>
+        `;
     }
 }
 
