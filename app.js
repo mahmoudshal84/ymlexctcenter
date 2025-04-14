@@ -766,10 +766,9 @@ async function loadExpenses() {
         
         // Process expenses
         expensesSnapshot.forEach(doc => {
-            const expense = doc.data();
-            if (!expense.refunded) {
-                totalExpenses += expense.price;
-            }
+        const expense = doc.data();
+        // Include all expenses in the total regardless of refund status
+            totalExpenses += expense.price;
         });
         
         // Process donations
