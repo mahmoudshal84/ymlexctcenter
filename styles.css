@@ -572,6 +572,36 @@ header h1 {
     color: var(--primary-color);
 }
 
+/* Inventory specific styles */
+.inventory-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.increase-quantity, .decrease-quantity {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.increase-quantity {
+    background-color: var(--success-color);
+}
+
+.decrease-quantity {
+    background-color: var(--error-color);
+}
+
+.quantity-value {
+    font-weight: bold;
+}
+
 /* Forms */
 .form-container {
     background-color: var(--secondary-color);
