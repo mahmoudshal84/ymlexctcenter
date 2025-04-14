@@ -904,7 +904,7 @@ async function viewExpense(e) {
                             <div class="detail-value">${expense.approvedBy}</div>
                         </div>
                         <div class="detail-row">
-                            <div class="detail-label">Refunded:</div>
+                            <div class="detail-label">Need to reimburse?</div>
                             <div class="detail-value">${expense.refunded ? 'Yes' : 'No'}</div>
                         </div>
                         <div class="detail-row">
