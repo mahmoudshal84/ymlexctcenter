@@ -1009,6 +1009,241 @@ async function viewDonation(e) {
     }
 }
 
+
+// ====== INVENTORY FUNCTIONALITY ======
+const addInventoryBtn = document.getElementById('add-inventory');
+const viewInventoryBtn = document.getElementById('view-inventory');
+const inventoryList = document.getElementById('inventory-list');
+const addInventoryForm = document.getElementById('add-inventory-form');
+const inventoryForm = document.getElementById('inventory-form');
+const cancelInventoryAddBtn = document.getElementById('cancel-inventory-add');
+
+// Show/hide inventory form
+addInventoryBtn.addEventListener('click', () => {
+    addInventoryForm.style.display = 'block';
+    inventoryForm.reset();
+    document.getElementById('inventory-quantity').value = 1;
+});
+
+cancelInventoryAddBtn.addEventListener('click', () => {
+    addInventoryForm.style.display = 'none';
+});
+
+// Handle inventory form submission
+inventoryForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const item = document.getElementById('inventory-item').value;
+    const location = document.getElementById('inventory-location').value;
+    const quantity = parseInt(document.getElementById('inventory-quantity').value);
+    
+    try {
+        await db.collection('inventory').add({
+            item,
+            location,
+            quantity,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            createdBy: currentUser.uid,
+            createdByName: currentUser.displayName
+        });
+        
+        addInventoryForm.style.display = 'none';
+        loadInventory();
+    } catch (error) {
+        console.error('Error adding inventory item:', error);
+        alert('Error adding inventory item. Please try again.');
+    }
+});
+
+// Load inventory
+async function loadInventory() {
+    try {
+        const snapshot = await db.collection('inventory')
+            .orderBy('item')
+            .get();
+        
+        let html = '';
+        
+        if (snapshot.empty) {
+            html = '<div class="empty-list">No inventory items found. Add some using the button above.</div>';
+        } else {
+            snapshot.forEach(doc => {
+                const inventoryItem = doc.data();
+                html += `
+                    <div class="list-item inventory-item" data-id="${doc.id}">
+                        <div>
+                            <h3>${inventoryItem.item}</h3>
+                            <div class="list-item-meta">Location: ${inventoryItem.location}</div>
+                            <div class="list-item-meta">Quantity: <span class="quantity-value">${inventoryItem.quantity}</span></div>
+                        </div>
+                        <div class="list-item-actions inventory-actions">
+                            <button class="btn-small decrease-quantity">-</button>
+                            <button class="btn-small increase-quantity">+</button>
+                            <button class="btn-small view-inventory-item">Details</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        
+        inventoryList.innerHTML = html;
+        
+        // Add event listeners to quantity buttons
+        const decreaseButtons = inventoryList.querySelectorAll('.decrease-quantity');
+        decreaseButtons.forEach(button => {
+            button.addEventListener('click', decreaseInventoryQuantity);
+        });
+        
+        const increaseButtons = inventoryList.querySelectorAll('.increase-quantity');
+        increaseButtons.forEach(button => {
+            button.addEventListener('click', increaseInventoryQuantity);
+        });
+        
+        // Add event listeners to view buttons
+        const viewButtons = inventoryList.querySelectorAll('.view-inventory-item');
+        viewButtons.forEach(button => {
+            button.addEventListener('click', viewInventoryItem);
+        });
+    } catch (error) {
+        console.error('Error loading inventory:', error);
+        inventoryList.innerHTML = '<div class="error-message">Error loading inventory. Please try again.</div>';
+    }
+}
+
+// Decrease inventory quantity
+async function decreaseInventoryQuantity(e) {
+    const button = e.target;
+    const listItem = button.closest('.inventory-item');
+    const itemId = listItem.getAttribute('data-id');
+    const quantityElement = listItem.querySelector('.quantity-value');
+    const currentQuantity = parseInt(quantityElement.textContent);
+    
+    // Don't allow negative quantities
+    if (currentQuantity <= 0) {
+        return;
+    }
+    
+    const newQuantity = currentQuantity - 1;
+    
+    try {
+        await db.collection('inventory').doc(itemId).update({
+            quantity: newQuantity
+        });
+        
+        // Update UI
+        quantityElement.textContent = newQuantity;
+    } catch (error) {
+        console.error('Error updating inventory quantity:', error);
+        alert('Error updating inventory quantity. Please try again.');
+    }
+}
+
+// Increase inventory quantity
+async function increaseInventoryQuantity(e) {
+    const button = e.target;
+    const listItem = button.closest('.inventory-item');
+    const itemId = listItem.getAttribute('data-id');
+    const quantityElement = listItem.querySelector('.quantity-value');
+    const currentQuantity = parseInt(quantityElement.textContent);
+    
+    const newQuantity = currentQuantity + 1;
+    
+    try {
+        await db.collection('inventory').doc(itemId).update({
+            quantity: newQuantity
+        });
+        
+        // Update UI
+        quantityElement.textContent = newQuantity;
+    } catch (error) {
+        console.error('Error updating inventory quantity:', error);
+        alert('Error updating inventory quantity. Please try again.');
+    }
+}
+
+// View inventory item details
+async function viewInventoryItem(e) {
+    const button = e.target;
+    const listItem = button.closest('.inventory-item');
+    const itemId = listItem.getAttribute('data-id');
+    
+    try {
+        const doc = await db.collection('inventory').doc(itemId).get();
+        if (doc.exists) {
+            const inventoryItem = doc.data();
+            
+            // Create modal for viewing inventory item
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <h2>Inventory Item: ${inventoryItem.item}</h2>
+                    <div class="inventory-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Item:</div>
+                            <div class="detail-value">${inventoryItem.item}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Location:</div>
+                            <div class="detail-value">${inventoryItem.location}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Quantity:</div>
+                            <div class="detail-value">${inventoryItem.quantity}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Added By:</div>
+                            <div class="detail-value">${inventoryItem.createdByName || 'Unknown'}</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="update-quantity">Update Quantity:</label>
+                        <input type="number" id="update-quantity" min="0" value="${inventoryItem.quantity}">
+                        <button id="save-quantity" class="btn">Save New Quantity</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Handle closing modal
+            const closeBtn = modal.querySelector('.close');
+            closeBtn.addEventListener('click', () => {
+                modal.remove();
+            });
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+            
+            // Handle save quantity
+            const saveBtn = modal.querySelector('#save-quantity');
+            saveBtn.addEventListener('click', async () => {
+                const newQuantity = parseInt(modal.querySelector('#update-quantity').value);
+                
+                try {
+                    await db.collection('inventory').doc(itemId).update({
+                        quantity: newQuantity
+                    });
+                    modal.remove();
+                    loadInventory();
+                } catch (error) {
+                    console.error('Error updating inventory quantity:', error);
+                    alert('Error updating inventory quantity. Please try again.');
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Error viewing inventory item:', error);
+        alert('Error viewing inventory item. Please try again.');
+    }
+}
+
+
 // ====== FORMS FUNCTIONALITY ======
 const addFormBtn = document.getElementById('add-form');
 const viewFormsBtn = document.getElementById('view-forms');
